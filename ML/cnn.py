@@ -17,15 +17,16 @@ import matplotlib.pylab as plt
 import numpy as np
 import cv2
 from numpy import array
+from keras import backend as K
+K.tensorflow_backend._get_available_gpus()
 
-
-batch_size = 5
+batch_size = 3
 num_classes = 2
 epochs = 10
 
 
 # input image dimensions
-img_x, img_y = 1400, 400
+img_x, img_y = 1092, 315
 
 # load the MNIST data set, which already splits into train and test sets for us
  
@@ -38,9 +39,10 @@ y_test = []
 x_test = []
 
 for fileName in fileNames:
-    w, x, _, _ = fileName.split('-')
+    w, x, _, _, = fileName.split('-')
     name = w + " " + x
-    if name == "Telophorus zeylonus":
+    print(name)
+    if name == "Andropadus importunus":
         y_train.append(0)
     else:
         y_train.append(1)
@@ -107,12 +109,12 @@ print(type(y_train)) #(107,2)
 print(y_test) #(0,2) 
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(5, 5), strides=(1, 1), activation='relu', input_shape=input_shape))
+model.add(Conv2D(32, kernel_size=(5, 5), strides=(5, 5), activation='relu', input_shape=input_shape))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Conv2D(64, (5, 5), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
-model.add(Dense(100, activation='relu'))
+model.add(Dense(10, activation='relu'))
 model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adam(), metrics=['accuracy'])
@@ -129,10 +131,11 @@ history = AccuracyHistory()
 
 model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, verbose=1,  validation_data=(x_test, y_test),  callbacks=[history])
 score = model.evaluate(x_test, y_test, verbose=0)
+print(model.summary())
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 plt.plot(range(1, 11), history.acc)
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.show()
-\
+
