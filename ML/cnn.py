@@ -19,9 +19,9 @@ import cv2
 from numpy import array
 
 
-batch_size = 1
+batch_size = 5
 num_classes = 2
-epochs = 100
+epochs = 10
 
 
 # input image dimensions
@@ -87,7 +87,7 @@ print("Input shape:")
 print(input_shape)
 
 
-# # convert the data to the right type
+# convert the data to the right type
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_train /= 255   #due to pixel being able to take 1-255 values, normalization
@@ -98,18 +98,18 @@ print(x_test.shape[0], 'test samples')
 
 
 
-# # convert class vectors to binary class matrices - this is for use in the categorical_crossentropy loss below
+# convert class vectors to binary class matrices - this is for use in the categorical_crossentropy loss below
 y_train = keras.utils.to_categorical(y_train, 2) 
 y_test = keras.utils.to_categorical(y_test, 2)
 
-#need one hot encoding
+# need one hot encoding
 print(type(y_train)) #(107,2)
 print(y_test) #(0,2) 
 
 model = Sequential()
-model.add(Conv2D(64, kernel_size=(5, 5), strides=(1, 1), activation='relu', input_shape=input_shape))
+model.add(Conv2D(32, kernel_size=(5, 5), strides=(1, 1), activation='relu', input_shape=input_shape))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Conv2D(128, (5, 5), activation='relu'))
+model.add(Conv2D(64, (5, 5), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
 model.add(Dense(100, activation='relu'))
@@ -135,3 +135,4 @@ plt.plot(range(1, 11), history.acc)
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.show()
+\
