@@ -2,10 +2,13 @@
 
 from __future__ import print_function
 
+from pyimagesearch.smallervggnet import SmallerVGGNet
+
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 import keras
+from keras.optimizers import Adam
 from keras.datasets import mnist
 from keras.layers import Dense, Flatten
 from keras.layers import Conv2D, MaxPooling2D
@@ -44,6 +47,10 @@ print(folderNames[0])
 # x_train = []
 # y_test = []
 # x_test = []
+EPOCHS = 100
+INIT_LR = 1e-3
+BS = 1
+IMAGE_DIMS = (img_x, img_y, 3)
 
 data = []
 labels = []
@@ -55,7 +62,7 @@ for folderName in folderNames:
         fullPath = folderPath + '/' + imageName
         print(fullPath)
         image = cv2.imread(fullPath)
-        image = cv2.resize(image, (img_x, img_y))
+        image = cv2.resize(image, (IMAGE_DIMS[0], IMAGE_DIMS[1]))
         image = img_to_array(image)
         data.append(image)
         label = folderName.split(os.path.sep)
@@ -79,7 +86,7 @@ print(x_train.shape)
 print("x test set shape")
 print(x_test.shape)
 
-input_shape = (img_x, img_y, 3)
+input_shape = (img_y, img_x, 3)
 print("Input shape:")
 print(input_shape)
 
@@ -87,6 +94,24 @@ aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
 	height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
 	horizontal_flip=True, fill_mode="nearest")
 
+print("[INFO] compiling model...")
+model = SmallerVGGNet.build(width=IMAGE_DIMS[0], height=IMAGE_DIMS[1],
+	depth=IMAGE_DIMS[2], classes=len(lb.classes_))
+opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+model.compile(loss="categorical_crossentropy", optimizer=opt,
+	metrics=["accuracy"])
+
+
+print("[INFO] training network...")
+H = model.fit_generator(
+	aug.flow(x_train, y_train, batch_size=BS),
+	validation_data=(x_test, y_test),
+	steps_per_epoch=len(x_train) // BS,
+	epochs=EPOCHS, verbose=1)
+
+# save the model to disk
+print("[INFO] serializing network...")
+model.save(args["model"])
 
 # # convert class vectors to binary class matrices - this is for use in the categorical_crossentropy loss below
 # y_train = keras.utils.to_categorical(y_train, 2) 
@@ -96,34 +121,34 @@ aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
 # print(type(y_train)) #(107,2)
 # print(y_test) #(0,2) 
 
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(5, 5), strides=(5, 5), activation='relu', input_shape=input_shape))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Conv2D(64, (5, 5), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(10, activation='relu'))
-model.add(Dense(num_classes, activation='softmax'))
+# model = Sequential()
+# model.add(Conv2D(32, kernel_size=(5, 5), strides=(5, 5), activation='relu', input_shape=input_shape))
+# model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+# model.add(Conv2D(64, (5, 5), activation='relu'))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Flatten())
+# model.add(Dense(10, activation='relu'))
+# model.add(Dense(num_classes, activation='softmax'))
 
-model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adam(), metrics=['accuracy'])
+# model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adam(), metrics=['accuracy'])
 
 
-class AccuracyHistory(keras.callbacks.Callback):
-    def on_train_begin(self, logs={}):
-        self.acc = []
+# class AccuracyHistory(keras.callbacks.Callback):
+#     def on_train_begin(self, logs={}):
+#         self.acc = []
 
-    def on_epoch_end(self, batch, logs={}):
-        self.acc.append(logs.get('acc'))
+#     def on_epoch_end(self, batch, logs={}):
+#         self.acc.append(logs.get('acc'))
 
-history = AccuracyHistory()
+# history = AccuracyHistory()
 
-model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, verbose=1,  validation_data=(x_test, y_test),  callbacks=[history])
-score = model.evaluate(x_test, y_test, verbose=0)
-print(model.summary())
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-plt.plot(range(1, 11), history.acc)
-plt.xlabel('Epochs')
-plt.ylabel('Accuracy')
-plt.show()
+# model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, verbose=1,  validation_data=(x_test, y_test),  callbacks=[history])
+# score = model.evaluate(x_test, y_test, verbose=0)
+# print(model.summary())
+# print('Test loss:', score[0])
+# print('Test accuracy:', score[1])
+# plt.plot(range(1, 11), history.acc)
+# plt.xlabel('Epochs')
+# plt.ylabel('Accuracy')
+# plt.show()
 
