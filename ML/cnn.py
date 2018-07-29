@@ -32,24 +32,18 @@ num_classes = 2
 epochs = 10
 
 
-# input image dimensions
-img_x, img_y = 1092, 315
 
-# load the MNIST data set, which already splits into train and test sets for us
+
+
  
 path = os.getcwd() + '/dataset/'
 folderNames = sorted(list(os.listdir(path)))
 random.seed(42)
 random.shuffle(folderNames)
-print(folderNames[0])
-
-# y_train = []
-# x_train = []
-# y_test = []
-# x_test = []
 EPOCHS = 100
 INIT_LR = 1e-3
 BS = 1
+img_x, img_y = 1092, 315
 IMAGE_DIMS = (img_x, img_y, 3)
 
 data = []
@@ -60,13 +54,11 @@ for folderName in folderNames:
     fileNames = sorted(list(os.listdir(folderPath)))
     for imageName in fileNames:
         fullPath = folderPath + '/' + imageName
-        print(fullPath)
         image = cv2.imread(fullPath)
         image = cv2.resize(image, (IMAGE_DIMS[0], IMAGE_DIMS[1]))
         image = img_to_array(image)
         data.append(image)
         label = folderName.split(os.path.sep)
-        print(label)
         labels.append(label)
 
 
@@ -109,7 +101,7 @@ H = model.fit_generator(
 	steps_per_epoch=len(x_train) // BS,
 	epochs=EPOCHS, verbose=1)
 
-# save the model to disk
+# save the model to disk    
 print("[INFO] serializing network...")
 model.save(args["model"])
 

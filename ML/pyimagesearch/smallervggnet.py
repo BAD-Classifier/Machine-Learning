@@ -16,6 +16,7 @@ class SmallerVGGNet:
 		# "channels last" and the channels dimension itself
 		model = Sequential()
 		inputShape = (height, width, depth)
+		# print("Height shape: " + str(inputShape[0])))
 		chanDim = -1
 
 		# if we are using "channels first", update the input shape
@@ -23,10 +24,13 @@ class SmallerVGGNet:
 		if K.image_data_format() == "channels_first":
 			inputShape = (depth, height, width)
 			chanDim = 1
+		
+		print("made it this far 1")
 
 		# CONV => RELU => POOL
 		model.add(Conv2D(32, (3, 3), padding="same",
 			input_shape=inputShape))
+		print("made it this far 2")
 		model.add(Activation("relu"))
 		model.add(BatchNormalization(axis=chanDim))
 		model.add(MaxPooling2D(pool_size=(3, 3)))
