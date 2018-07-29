@@ -44,7 +44,7 @@ EPOCHS = 100
 INIT_LR = 1e-3
 BS = 1
 img_x, img_y = 1092, 315
-IMAGE_DIMS = (img_x, img_y, 3)
+IMAGE_DIMS = (100, 100, 3)
 
 data = []
 labels = []
@@ -67,16 +67,26 @@ labels = np.array(labels)
 print("[INFO] data matrix: {:.2f}MB".format(
 	data.nbytes / (1024 * 1000.0)))
 
+# for i in labels:
+#     print(i)    
+
 lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
 
+labels = keras.utils.to_categorical(labels, num_classes=2)
+
+print(labels.shape)
 
 (x_train, x_test, y_train, y_test) = train_test_split(data, labels, test_size=0.2, random_state=42)
 
 print("x train set shape")
 print(x_train.shape)
+print("y train set shape")
+print(y_train.shape)
 print("x test set shape")
 print(x_test.shape)
+print("y test set shape")
+print(y_test.shape)
 
 input_shape = (img_y, img_x, 3)
 print("Input shape:")
@@ -93,6 +103,7 @@ opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
+print(model.summary())
 
 print("[INFO] training network...")
 H = model.fit_generator(
@@ -100,6 +111,7 @@ H = model.fit_generator(
 	validation_data=(x_test, y_test),
 	steps_per_epoch=len(x_train) // BS,
 	epochs=EPOCHS, verbose=1)
+# model.fit(x_train, y_train, batch_size=BS, epochs=1, validation_data=(x_test, y_test))
 
 # save the model to disk    
 print("[INFO] serializing network...")
