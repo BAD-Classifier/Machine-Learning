@@ -5,8 +5,6 @@ from __future__ import print_function
 from pyimagesearch.smallervggnet import SmallerVGGNet
 
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
 import keras
 from keras.optimizers import Adam
 from keras.datasets import mnist
@@ -24,27 +22,20 @@ from keras.preprocessing.image import img_to_array
 import numpy as np
 import cv2
 from numpy import array
-from keras import backend as K
-K.tensorflow_backend._get_available_gpus()
+import pickle
+import matplotlib.pyplot as plt
 from imutils import paths
-batch_size = 1
-num_classes = 2
-epochs = 10
-
-
-
-
 
  
 path = os.getcwd() + '/dataset/'
 folderNames = sorted(list(os.listdir(path)))
 random.seed(42)
 random.shuffle(folderNames)
-EPOCHS = 100
+EPOCHS = 1000
 INIT_LR = 1e-3
-BS = 1
+BS = 3
 img_x, img_y = 1092, 315
-IMAGE_DIMS = (100, 100, 3)
+IMAGE_DIMS = (350, 100, 3)
 
 data = []
 labels = []
@@ -66,9 +57,6 @@ data = np.array(data, dtype="float") /255.0
 labels = np.array(labels)
 print("[INFO] data matrix: {:.2f}MB".format(
 	data.nbytes / (1024 * 1000.0)))
-
-# for i in labels:
-#     print(i)    
 
 lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
@@ -115,44 +103,23 @@ H = model.fit_generator(
 
 # save the model to disk    
 print("[INFO] serializing network...")
-model.save(args["model"])
+model.save('attempt,model')
 
-# # convert class vectors to binary class matrices - this is for use in the categorical_crossentropy loss below
-# y_train = keras.utils.to_categorical(y_train, 2) 
-# y_test = keras.utils.to_categorical(y_test, 2)
+print("[INFO] serializing label binarizer...")
+f = open('lb.pickle', "wb")
+f.write(pickle.dumps(lb))
+f.close()
 
-# # need one hot encoding
-# print(type(y_train)) #(107,2)
-# print(y_test) #(0,2) 
-
-# model = Sequential()
-# model.add(Conv2D(32, kernel_size=(5, 5), strides=(5, 5), activation='relu', input_shape=input_shape))
-# model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-# model.add(Conv2D(64, (5, 5), activation='relu'))
-# model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(Flatten())
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(num_classes, activation='softmax'))
-
-# model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adam(), metrics=['accuracy'])
-
-
-# class AccuracyHistory(keras.callbacks.Callback):
-#     def on_train_begin(self, logs={}):
-#         self.acc = []
-
-#     def on_epoch_end(self, batch, logs={}):
-#         self.acc.append(logs.get('acc'))
-
-# history = AccuracyHistory()
-
-# model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, verbose=1,  validation_data=(x_test, y_test),  callbacks=[history])
-# score = model.evaluate(x_test, y_test, verbose=0)
-# print(model.summary())
-# print('Test loss:', score[0])
-# print('Test accuracy:', score[1])
-# plt.plot(range(1, 11), history.acc)
-# plt.xlabel('Epochs')
-# plt.ylabel('Accuracy')
-# plt.show()
-
+# plot the training loss and accuracy
+plt.style.use("ggplot")
+plt.figure()
+N = EPOCHS
+plt.plot(np.arange(0, N), H.history["loss"], label="train_loss")
+plt.plot(np.arange(0, N), H.history["val_loss"], label="val_loss")
+plt.plot(np.arange(0, N), H.history["acc"], label="train_acc")
+plt.plot(np.arange(0, N), H.history["val_acc"], label="val_acc")
+plt.title("Training Loss and Accuracy")
+plt.xlabel("Epoch #")
+plt.ylabel("Loss/Accuracy")
+plt.legend(loc="upper left")
+plt.savefig('plot.png')
