@@ -15,7 +15,7 @@ def convert_to_image(birdSoundPath, birdName):
     save_image(picName)
 
 def save_image(picName):
-    path = os.getcwd() + '/BirdMFCCS/Short/'
+    path = os.getcwd() + '/BirdMFCCS/ShortTest/'
     if not os.path.exists(path):
         os.makedirs(path)
     fileName = path + picName
@@ -28,7 +28,7 @@ def main():
     totalFiles = 672
     count = 1
 
-    path = os.getcwd() + '/Sounds/'
+    path = os.getcwd() + '/Sounds_Test/'
     fileNames = os.listdir(path)
     for fileName in fileNames:
         birdSound = path + fileName
