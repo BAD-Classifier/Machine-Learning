@@ -42,15 +42,14 @@ print("[INFO] classifying image...")
 proba = model.predict(image)[0]
 idx = np.argmax(proba)
 label = lb.classes_[idx]
-
 # we'll mark our prediction as "correct" of the input image filename
 # contains the predicted label text (obviously this makes the
 # assumption that you have named your testing image files this way)
 filename = args["image"][args["image"].rfind(os.path.sep) + 1:]
-correct = "correct" if filename.rfind(label) != -1 else "incorrect"
+
 
 # build the label and draw the label on the image
-label = "{}: {:.2f}% ({})".format(label, proba[idx] * 100, correct)
+label = "{}: {:.2f}%".format(label, proba[idx] * 100)
 output = imutils.resize(output, width=400)
 cv2.putText(output, label, (10, 25),  cv2.FONT_HERSHEY_SIMPLEX,
 	0.7, (0, 255, 0), 2)

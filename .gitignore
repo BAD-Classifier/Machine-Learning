@@ -2,6 +2,17 @@
 
 *.model
 *.mp3
+*.wav
+*.model
+
+/DataProcessing/TESTING/
+/DataProcessing/ALL/
+/DataProcessing/ALL_2/
+/DataProcessing/Top10-4sec-Manual/
+/ML/dataset/
+/ML/examples/
+*.vscode
+
 
 ### Images ###
 # JPEG
@@ -109,6 +120,7 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+
 
 # Installer logs
 pip-log.txt

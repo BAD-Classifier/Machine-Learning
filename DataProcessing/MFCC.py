@@ -5,7 +5,7 @@ import os
 
 def convert_to_image(birdSoundPath, birdName):
     x, fs = librosa.load(birdSoundPath,sr=None,mono=True)
-    mfccs = librosa.feature.mfcc(x, sr=fs, n_fft=1024, hop_length=512, n_mfcc=13)
+    mfccs = librosa.feature.mfcc(x, sr=fs, n_fft=1024, hop_length=512, n_mfcc=13, fmin=0,fmax=8000)
     librosa.display.specshow(mfccs, sr=fs, x_axis='time')
     mfccs = sklearn.preprocessing.scale(mfccs, axis=1)  
     mfccs.mean(axis=1)
@@ -15,7 +15,7 @@ def convert_to_image(birdSoundPath, birdName):
     save_image(picName)
 
 def save_image(picName):
-    path = os.getcwd() + '/BirdMFCCS/ShortTest/'
+    path = os.getcwd() + '/BirdMFCCS/top_10_full/'
     if not os.path.exists(path):
         os.makedirs(path)
     fileName = path + picName
@@ -28,7 +28,7 @@ def main():
     totalFiles = 672
     count = 1
 
-    path = os.getcwd() + '/Sounds_Test/'
+    path = os.getcwd() + '/ALL/'
     fileNames = os.listdir(path)
     for fileName in fileNames:
         birdSound = path + fileName
