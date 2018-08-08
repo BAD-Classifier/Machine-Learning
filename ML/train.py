@@ -1,8 +1,7 @@
-
-
 from __future__ import print_function
 
-from pyimagesearch.smallervggnet import SmallerVGGNet
+from CNN.smallervggnet import SmallerVGGNet
+# from pyimagesearch.vgg16 import VGGNet
 
 
 import os
@@ -26,17 +25,18 @@ from numpy import array
 import pickle
 import matplotlib.pyplot as plt
 from imutils import paths
+import tensorflow as tf
 
  
-path = os.getcwd() + '/dataset/'
+path = os.getcwd() + '/Cleaned_Data/'
 folderNames = sorted(list(os.listdir(path)))
 random.seed(42)
 random.shuffle(folderNames)
-EPOCHS = 300
+EPOCHS = 5
 INIT_LR = 1e-3
 BS = 5
 img_x, img_y = 1092, 315
-IMAGE_DIMS = (350, 100, 3)
+IMAGE_DIMS = (200, 100, 3)
 
 data = []
 labels = []
@@ -64,7 +64,7 @@ lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
 
 
-labels = keras.utils.to_categorical(labels, num_classes=2)
+# labels = keras.utils.to_categorical(labels, num_classes=2)
 
 
 print(labels.shape)
@@ -89,13 +89,17 @@ aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
 	horizontal_flip=True, fill_mode="nearest")
 
 print("[INFO] compiling model...")
-model = SmallerVGGNet.build(width=IMAGE_DIMS[0], height=IMAGE_DIMS[1],
-	depth=IMAGE_DIMS[2], classes=len(lb.classes_))
+model = SmallerVGGNet.build(width=IMAGE_DIMS[0], height=IMAGE_DIMS[1],depth=IMAGE_DIMS[2], classes=len(lb.classes_))
+# model = multi_gpu_model(model, gpus=2)
 opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
-	metrics=["accuracy"])
+metrics=["accuracy"])
+
 
 print(model.summary())
+	# make the model parallel
+	
+
 
 print("[INFO] training network...")
 H = model.fit_generator(
@@ -107,7 +111,7 @@ H = model.fit_generator(
 
 # save the model to disk    
 print("[INFO] serializing network...")
-model.save('attempt.model')
+model.save('it_9.model')
 
 print("[INFO] serializing label binarizer...")
 f = open('lb.pickle', "wb")
