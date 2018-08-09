@@ -9,7 +9,7 @@ genus = 'Telophorus'
 def convert_to_image(birdSoundPath, birdName):
     x, fs = librosa.load(birdSoundPath,sr=None,mono=True)
 
-    win_length = 4 * fs
+    win_length = 3 * fs
     sound_length = len(x)
     div = sound_length//win_length
     start = 0
@@ -24,7 +24,7 @@ def convert_to_image(birdSoundPath, birdName):
     if len(x[start:]) > win_length/2:
         clips.append(x[start:])
     u_id = 1
-    path = os.getcwd() + '/TESTING/sounds/'
+    path = os.getcwd() + '/3_sec/sounds/'
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -42,7 +42,7 @@ def convert_to_image(birdSoundPath, birdName):
 
 
 def save_image(picName):
-    path = os.getcwd() + '/TESTING/MFCCs/'
+    path = os.getcwd() + '/3_sec/MFCCs/'
     if not os.path.exists(path):
         os.makedirs(path)
     fileName = path + picName
@@ -59,7 +59,9 @@ def main():
     path = os.getcwd() + '/ALL/' + genus
     fileNames = os.listdir(path)
     all_genus_id = []
-    path = os.getcwd() + '/TESTING/MFCCs/' 
+    path = os.getcwd() + '/3_sec/MFCCs/' 
+    if not os.path.exists(path):
+        os.makedirs(path)
     incompleteFiles = os.listdir(path)
     completedFiles = []
     remainingSoundPaths = []
