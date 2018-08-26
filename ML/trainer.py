@@ -23,11 +23,15 @@ All_files = glob.glob(current_path + '/Reduced_Data_further/**/*')
 print("Number of total files: " + str(len(All_files)))
 
 ######--HYPERPARAMETERS--#######
-Epochs = 1             
+Epochs = 1000             
 Learning_Rate = 1e-5            
-Batch_Size = 20                    
-Image_Dimensions = (120, 80, 3)
-model_name = '1-Final'  
+Batch_Size = 5                    
+Image_Dimensions = (120, 84, 3)
+model_name = '2-32-2-64-2-128--5'
+act_type = "relu"  
+filter_size = (3, 3)
+pad_type = "same"
+dropout_rate = 0.5
 ################################
 
 # data and label intitialization
@@ -72,44 +76,44 @@ if K.image_data_format() == "channels_first":
 
 # Defining model architecture
 model = Sequential()
-model.add(Conv2D(32, (3, 3), padding="same", input_shape=input_parameters))
-model.add(Activation("relu"))
+model.add(Conv2D(32, filter_size, padding=pad_type, input_shape=input_parameters))
+model.add(Activation(act_type))
 model.add(BatchNormalization(axis=channel_dimensions))
-model.add(Dropout(0.5))
+model.add(Dropout(dropout_rate))
 
-model.add(Conv2D(32, (3, 3), padding="same"))
-model.add(Activation("relu"))
+model.add(Conv2D(32, filter_size, padding=pad_type))
+model.add(Activation(act_type))
+model.add(BatchNormalization(axis=channel_dimensions))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(Dropout(dropout_rate))
+
+model.add(Conv2D(64, filter_size, padding=pad_type))
+model.add(Activation(act_type))
+model.add(BatchNormalization(axis=channel_dimensions))
+model.add(Dropout(dropout_rate))
+
+model.add(Conv2D(64, filter_size, padding=pad_type))
+model.add(Activation(act_type))
 model.add(BatchNormalization(axis=channel_dimensions))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
+model.add(Dropout(dropout_rate))
 
-model.add(Conv2D(64, (3, 3), padding="same"))
-model.add(Activation("relu"))
+model.add(Conv2D(128, filter_size, padding=pad_type))
+model.add(Activation(act_type))
 model.add(BatchNormalization(axis=channel_dimensions))
-model.add(Dropout(0.5))
+model.add(Dropout(dropout_rate))
 
-model.add(Conv2D(64, (3, 3), padding="same"))
-model.add(Activation("relu"))
-model.add(BatchNormalization(axis=channel_dimensions))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
-
-model.add(Conv2D(128, (3, 3), padding="same"))
-model.add(Activation("relu"))
-model.add(BatchNormalization(axis=channel_dimensions))
-model.add(Dropout(0.5))
-
-model.add(Conv2D(128, (3, 3), padding="same"))
-model.add(Activation("relu"))
+model.add(Conv2D(128, filter_size, padding=pad_type))
+model.add(Activation(act_type))
 model.add(BatchNormalization(axis=channel_dimensions))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
+model.add(Dropout(dropout_rate))
 
 model.add(Flatten())
 model.add(Dense(1024, use_bias=False))
 model.add(BatchNormalization())
-model.add(Activation("relu"))
-model.add(Dropout(0.8))
+model.add(Activation(act_type))
+model.add(Dropout(dropout_rate+0.3))
 
 model.add(Dense(classes))
 model.add(Activation("softmax"))
@@ -117,7 +121,7 @@ model.add(Activation("softmax"))
 # Model compilation
 opt = Adam(lr=Learning_Rate, decay=Learning_Rate/Epochs)
 model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
-filepath= model_name + "/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+filepath = model_name + "/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
 
@@ -127,31 +131,40 @@ model_history = model.fit_generator(data_augmentation.flow(x_train, y_train, bat
 data_augmentation.flow(x_train, y_train, batch_size=Batch_Size)
 
 # Save Model 
-model.save(model_name+'.model')
+model.save(model_name+ '/' + model_name+'.model')
 
 # Save Labels
-pickle_file = open('lb.pickle', "wb")
+pickle_file = open('labels.pickle', "wb")
 pickle_file.write(pickle.dumps(lb))
 pickle_file.close()
 
 # Plot loss and accuracy of model
-plt.style.use("bmh")
-N = Epochs
-
 plt.figure()
-plt.plot(np.arange(0, N), model_history.history["acc"], label="Training Accuracy")
-plt.plot(np.arange(0, N), model_history.history["val_acc"], label="Validation Accuracy")
+plt.plot(np.arange(0, Epochs), model_history.history["acc"], label="Training Accuracy")
+plt.plot(np.arange(0, Epochs), model_history.history["val_acc"], label="Validation Accuracy")
 plt.title("Accuracy vs Validation Accuracy")
 plt.xlabel("Epoch Number")
 plt.ylabel("Accuracy")
 plt.legend(loc="upper left")
-plt.savefig(model_name + '-acc.png')
+plt.savefig(model_name+ '/' + model_name + '-acc.png')
 
 plt.figure()
-plt.plot(np.arange(0, N), model_history.history["loss"], label="Training Loss")
-plt.plot(np.arange(0, N), model_history.history["val_loss"], label="Validation Loss")
+plt.plot(np.arange(0, Epochs), model_history.history["loss"], label="Training Loss")
+plt.plot(np.arange(0, Epochs), model_history.history["val_loss"], label="Validation Loss")
 plt.title("Loss vs Validation Loss")
 plt.xlabel("Epoch Number")
 plt.ylabel("Loss")
 plt.legend(loc="upper left")
-plt.savefig(model_name + '-loss.png')
+plt.savefig(model_name+ '/' + model_name + '-loss.png')
+
+# Creating arrays of the data to plot manually 
+accuracy_history = np.array(model_history.history["acc"])
+val_accuracy_history = np.array(model_history.history["val_acc"])
+loss_history = np.array(model_history.history["loss"])
+val_loss_history = np.array(model_history.history["val_loss"])
+
+# Saving arrays to text files
+np.savetxt(model_name+ '/' + model_name + "-accuracy.txt", accuracy_history, delimiter=",")
+np.savetxt( model_name+ '/' + model_name + "-val_accuracy.txt", val_accuracy_history, delimiter=",")
+np.savetxt(model_name+ '/' + model_name + "-loss.txt", loss_history, delimiter=",")
+np.savetxt(model_name+ '/' + model_name + "-val_loss.txt", val_loss_history, delimiter=",")
