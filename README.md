@@ -1,5 +1,7 @@
 # Machine-Learning
 ### Convolutional Neural Network (CNN)
+![](https://i.imgur.com/m4WHJl1.png)  
+
 This project uses a CNN to learn the MFCCs for each of the bird species. The CNN architecture is made up of:
 - conv2d - 32 filters
 - conv2d - 32 filters
