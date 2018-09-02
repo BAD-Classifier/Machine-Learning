@@ -59,7 +59,7 @@ labels = lb.fit_transform(labels)
 (x_train, x_test, y_train, y_test) = train_test_split(data, labels, test_size=0.2)
 
 # Data Augmentation
-data_augmentation = ImageDataGenerator(width_shift_range=0.15, height_shift_range=0.15, shear_range=0.25, zoom_range=0.2)
+data_augmentation = ImageDataGenerator(width_shift_range=0.15, height_shift_range=0.15)
 
 # Model inputs
 width = Image_Dimensions[0]
